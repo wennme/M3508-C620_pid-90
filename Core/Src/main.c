@@ -36,7 +36,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define MOTOR_MAX 4 //×î´óµç»úÊı
+#define MOTOR_MAX 4 //æœ€å¤§ç”µæœºæ•°
 #define get_motor_measure(ptr, data)                                    \
     {                                                                   \
         (ptr)->last_ecd = (ptr)->ecd;                                   \
@@ -60,10 +60,8 @@ int16_t desireangle[MOTOR_MAX];
 MOTOR_TypeDef motor;
 motor_measure_t motor_data;
 float motor_err[MOTOR_MAX]; 
-float motor_POS_ABS=0; //¾ø¶ÔÎ»ÖÃ
+float motor_POS_ABS=0; //ç»å¯¹ä½ç½®
 float pos, pos_old;
-float abs_err[MOTOR_MAX];
-float abs_err_old[MOTOR_MAX]; 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -75,7 +73,7 @@ float ABS(float number)
 	else {return number;}
 }
 
-void Motor_Angle_Cal(unsigned short int motor_num,float T)//µç¼«IDÓëµç»ú×Ô´«Ò»È¦½Ç¶È
+void Motor_Angle_Cal(unsigned short int motor_num,float T)//ç”µæIDä¸ç”µæœºè‡ªä¼ ä¸€åœˆè§’åº¦
 {
 	float  res1, res2;
 //	int  res3, res4;
@@ -85,16 +83,16 @@ void Motor_Angle_Cal(unsigned short int motor_num,float T)//µç¼«IDÓëµç»ú×Ô´«Ò»È¦
 	
 	if(eer[motor_num]>0) 	
 	{
-		res1=eer[motor_num]-T;//·´×ª£¬×Ô¼õ
+		res1=eer[motor_num]-T;//åè½¬ï¼Œè‡ªå‡
 		res2=eer[motor_num];
 	}
 	else
 	{
-		res1=eer[motor_num]+T;//Õı×ª£¬×Ô¼ÓÒ»¸öÖÜÆÚµÄ½Ç¶ÈÖµ£¨360£©
+		res1=eer[motor_num]+T;//æ­£è½¬ï¼Œè‡ªåŠ ä¸€ä¸ªå‘¨æœŸçš„è§’åº¦å€¼ï¼ˆ360ï¼‰
 		res2=eer[motor_num];
 	}
 	
-	if(ABS(res1)<ABS(res2)) //²»¹ÜÕı·´×ª£¬¿Ï¶¨ÊÇ×ªµÄ½Ç¶ÈĞ¡µÄÄÇ¸öÊÇÕæµÄ
+	if(ABS(res1)<ABS(res2)) //ä¸ç®¡æ­£åè½¬ï¼Œè‚¯å®šæ˜¯è½¬çš„è§’åº¦å°çš„é‚£ä¸ªæ˜¯çœŸçš„
 	{
 		motor_POS_ABS += res1;
 	}
@@ -215,7 +213,7 @@ int main(void)
 //		CAN1_control_motor(pOut + iOut + dOut);
 //		HAL_Delay(1);
   /* USER CODE BEGIN WHILE */
-	desireangle[num]=90*19;//×ª×Ó½Ç¶È
+	desireangle[num]=90*19;//è½¬å­è§’åº¦
 	motor_POS_ABS=0;
 //	limit = 500;
 
@@ -227,9 +225,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
 		PID_Cal_Limt(&motor.PID_ANGLE[num], motor_err[num], motor_POS_ABS,desireangle[num]);
-		abs_err[num] = motor_POS_ABS - abs_err_old[num];
-		PID_Cal_Limt( &motor.PID_SPEED[num], 10, abs_err[num], motor.PID_ANGLE[num].OUT);
-		abs_err_old[num] = motor_POS_ABS;
+		PID_Cal_Limt( &motor.PID_SPEED[num], 10, motor_data.speed_rpm, motor.PID_ANGLE[num].OUT);
 		CAN_cmd_chassis((int16_t)(motor.PID_SPEED[num].OUT),0,0,0);
 		HAL_Delay(1);
   }
@@ -282,7 +278,7 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-float PID_Cal_Limt(_PID *PID, float limit, float get, float set)//PIDËÀÇøĞŞ¸Ä
+float PID_Cal_Limt(_PID *PID, float limit, float get, float set)//PIDæ­»åŒºä¿®æ”¹
 {
 	PID->err = set - get;
 	PID->err_err = PID->err - PID->err_old;
