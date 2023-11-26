@@ -56,7 +56,7 @@
 
 /* USER CODE BEGIN PV */
 int16_t desireRpm[MOTOR_MAX];
-int16_t desireangle[MOTOR_MAX];
+float desireangle[MOTOR_MAX];
 MOTOR_TypeDef motor;
 motor_measure_t motor_data;
 float motor_err[MOTOR_MAX]; 
@@ -126,9 +126,9 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
             //get motor id
             i = rx_header.StdId - CAN_3508_M1_ID;
             get_motor_measure(&motor_data, rx_data);
-						pos=(motor_data.ecd/8192.0f)*360.0f;
-					  pos_old = (motor_data.last_ecd/8192.0f)*360.0f;
-						Motor_Angle_Cal(i,360);
+						pos=motor_data.ecd;
+					  pos_old = motor_data.last_ecd;
+						Motor_Angle_Cal(i,8192);
             break;
         }
 				
@@ -213,9 +213,8 @@ int main(void)
 //		CAN1_control_motor(pOut + iOut + dOut);
 //		HAL_Delay(1);
   /* USER CODE BEGIN WHILE */
-	desireangle[num]=90*19;//转子角度
+	desireangle[num]=8192/4*3591/187;//转子角度
 	motor_POS_ABS=0;
-//	limit = 500;
 
   while (1)
   {
