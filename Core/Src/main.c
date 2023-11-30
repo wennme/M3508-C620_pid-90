@@ -172,12 +172,12 @@ int main(void)
 	HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
 	
 	motor_err[num]=50;
-	motor.PID_ANGLE[num].P=2;
+	motor.PID_ANGLE[num].P=0.09;
 	motor.PID_ANGLE[num].I=0;
-	motor.PID_ANGLE[num].D=0;
+	motor.PID_ANGLE[num].D=1;
 	motor.PID_ANGLE[num].OUT_LIMIT=1000;
 	motor.PID_ANGLE[num].I_LIMIT=400;		
-	motor.PID_SPEED[num].P=2;
+	motor.PID_SPEED[num].P=6;
 	motor.PID_SPEED[num].I=0;
 	motor.PID_SPEED[num].D=0;
 	motor.PID_SPEED[num].OUT_LIMIT=1000;
