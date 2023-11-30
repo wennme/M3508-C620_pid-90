@@ -67,39 +67,21 @@ float pos, pos_old;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-float ABS(float number)
-{
-	if(number<0) {return -number;}
-	else {return number;}
-}
-
 void Motor_Angle_Cal(unsigned short int motor_num,float T)//电极ID与电机自传一圈角度
 {
-	float  res1, res2;
-//	int  res3, res4;
 	static float eer[MOTOR_MAX];
 	
 	eer[motor_num]=pos - pos_old;
 	
-	if(eer[motor_num]>0) 	
+	if(eer[motor_num]>T/2) 	
 	{
-		res1=eer[motor_num]-T;//反转，自减
-		res2=eer[motor_num];
+		eer[motor_num]=eer[motor_num]-T;//反转，自减
 	}
-	else
+	else if(eer[motor_num]<-T/2)
 	{
-		res1=eer[motor_num]+T;//正转，自加一个周期的角度值（360）
-		res2=eer[motor_num];
+		eer[motor_num]=eer[motor_num]+T;//正转，自加一个周期的角度值（360）
 	}
-	
-	if(ABS(res1)<ABS(res2)) //不管正反转，肯定是转的角度小的那个是真的
-	{
-		motor_POS_ABS += res1;
-	}
-	else
-	{
-		motor_POS_ABS += res2;
-	}
+	motor_POS_ABS += eer[motor_num];
 }
 /* USER CODE END PFP */
 
@@ -292,7 +274,7 @@ float PID_Cal_Limt(_PID *PID, float limit, float get, float set)//PID死区修�
 	
 	PID->OUT = (PID->OUT > PID->OUT_LIMIT)?(PID->OUT_LIMIT):((PID->OUT < -PID->OUT_LIMIT)?(-PID->OUT_LIMIT):(PID->OUT));
 	
-	if(ABS(PID->err) <= ABS(limit))
+	if((PID->err >= -limit)&&(PID->err <= limit))
 	{
 	  PID->I_OUT=0;
 	  PID->OUT=0;
